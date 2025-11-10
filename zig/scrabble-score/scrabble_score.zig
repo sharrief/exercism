@@ -2,7 +2,7 @@ const std = @import("std");
 
 pub fn score(s: []const u8) u32 {
     var total_score: u32 = 0;
-    const MAX_SCORE: u32 = 0xffff_ffff;
+    const MAX_SCORE: u32 = 0xff_ff_ff_ff;
     for (s) |char| {
         const noramlized_char: u8 = if (char >= 97) char - 32 else char;
         const char_score: u32 = switch (noramlized_char) {
