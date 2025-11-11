@@ -3,6 +3,7 @@ const mem = std.mem;
 
 pub fn transform(allocator: mem.Allocator, legacy: std.AutoHashMap(i5, []const u8)) mem.Allocator.Error!std.AutoHashMap(u8, i5) {
     var new_legacy = std.AutoHashMap(u8, i5).init(allocator);
+    errdefer new_legacy.deinit();
     var legacy_iter = legacy.iterator();
 
     while (legacy_iter.next()) |legacy_entry| {
