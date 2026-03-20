@@ -16,6 +16,11 @@ export class Bowling {
    */
   throws = []
   /**
+   * The current number of pins standing
+   * @param {number}
+   */
+  pinsUp = 0
+  /**
    * The number of extra times a throw scores
    * @type {number[]}
    */
@@ -27,48 +32,43 @@ export class Bowling {
   completedBoxNumber = 0
 
   constructor() {
-    this.throws = new Array(23).fill(null)
-    this.bonus = new Array(23).fill(0)
+    this.pinsUp = 10
+    this.throws = new Array(25).fill(null)
+    this.bonus = new Array(25).fill(0)
   }
 
   /**
-  * @param {number} pins The number of pins downed in a throw
+  * @param {number} pinsDowned The number of pins downed in a throw
   */
-  roll(pins) {
-    if (pins < 0) throw new Error('Negative roll is invalid')
-    if (pins > 10) throw new Error('Pin count exceeds pins on the lane')
-    if (this.completedBoxNumber <= 20 && (this.completedBoxNumber + 1) % 2 == 0 && this.throws[this.completedBoxNumber] + pins > 10) throw new Error('Pin count exceeds pins on the lane')
-    if (this.completedBoxNumber > 20 && (this.throws[this.completedBoxNumber] != 10 && pins != 10) && this.throws[this.completedBoxNumber] + pins > 10) throw new Error('Pin count exceeds pins on the lane')
-    if (this.completedBoxNumber == 21 && this.throws[this.completedBoxNumber] != )
+  roll(pinsDowned) {
+    if (pinsDowned < 0) throw new Error('Negative roll is invalid')
+    if (pinsDowned > pinsUp) throw new Error('Pin count exceeds pins on the lane')
 
-      if (this.completedBoxNumber < 20
-        || this.completedBoxNumber === 20 && this.bonus[21]
-        || this.completedBoxNumber === 21 && this.bonus[22]
-      )
-        this.throws[++this.completedBoxNumber] = pins
-      else throw new Error('Cannot roll after game is over')
+    if (this.completedBoxNumber >= 20 && !this.bonus[this.completedBoxNumber + 1])
+      throw new Error('Cannot roll after game is over')
 
+    this.throws[++this.completedBoxNumber] = pinsDowned
+    this.pinsUp -= pinsDowned
 
     // handle bonus scoring
-    if (this.completedBoxNumber <= 20) {
-      // spares can only occur on even box numbers
-      const isEvenBoxNumber = this.completedBoxNumber % 2 === 0
-      const previousThrowScore = this.throws[this.completedBoxNumber - 1]
-      if (isEvenBoxNumber && previousThrowScore == null) throw new Error("Previous throw score should never be null for an even box number")
-      const isSpare = isEvenBoxNumber && (previousThrowScore + pins === 10)
-      const isStrike = !isSpare && pins === 10
-      if (isSpare) {
-        this.bonus[this.completedBoxNumber + 1]++
-      } else if (isStrike) {
-        // a stike skips to the next frame
-        if (this.throws[++this.completedBoxNumber] != null) throw new Error("The box after a strike should always be null")
-        // if there was already bonus for this box number, move it to the next potential throw
-        this.bonus[this.completedBoxNumber + 1] += this.bonus[this.completedBoxNumber]
-        this.bonus[this.completedBoxNumber] = 0
+    const isEvenBoxNumber = this.completedBoxNumber % 2 === 0
+    const isSpare = isEvenBoxNumber && this.pinsUp === 0
+    const isStrike = !isSpare && this.pinsUp === 0
+    const isFillBall = this.completedBoxNumber > 20
+    if (isSpare && !isFillBall) this.bonus[this.completedBoxNumber + 1]++
+    if (isStrike) {
+      this.bonus[this.completedBoxNumber + 1] += this.bonus[this.completedBoxNumber]
+      this.bonus[this.completedBoxNumber] = 0
+      this.completedBoxNumber++
+      if (!isFillBall) {
         // add the bonuses for this strike
         this.bonus[this.completedBoxNumber + 1]++
         this.bonus[this.completedBoxNumber + 2]++
       }
+    }
+    if (isStrike || this.completedBoxNumber % 2 == 0) {
+      // reset the pins
+      this.pinsUp = 10
     }
   }
 
